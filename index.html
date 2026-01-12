@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 1: 救恩大故事排序游戏</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2e;
+      --tile:#1f8a70;
+      --tile2:#f2994a;
+      --tile3:#f2c94c;
+      --tile4:#6fcf97;
+      --text:#ffffff;
+      --muted:#b8c0d9;
+      --accent:#7aa2ff;
+      --good:#22c55e;
+      --bad:#ef4444;
+    }
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:linear-gradient(180deg, #070b14, var(--bg));
+      color:var(--text);
+    }
+    .wrap{max-width:1050px; margin:0 auto; padding:20px;}
+    h1{margin:0 0 10px; font-size:22px; font-weight:800;}
+    .sub{color:var(--muted); margin-bottom:16px; line-height:1.4;}
+    .panel{
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;
+      padding:16px;
+    }
+    .toolbar{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;
+    }
+    button{
+      border:0; border-radius:12px; padding:10px 12px;
+      background:rgba(255,255,255,0.10);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:700;
+    }
+    button:hover{background:rgba(255,255,255,0.16);}
+    button.primary{background:rgba(122,162,255,0.22); border:1px solid rgba(122,162,255,0.35);}
+    button.good{background:rgba(34,197,94,0.18); border:1px solid rgba(34,197,94,0.35);}
+    button.bad{background:rgba(239,68,68,0.16); border:1px solid rgba(239,68,68,0.35);}
+    .pill{
+      padding:8px 10px; border-radius:999px; font-weight:700;
+      background:rgba(255,255,255,0.07); color:var(--muted);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
+      gap:12px;
+    }
+    @media (max-width: 950px){
+      .grid{grid-template-columns: repeat(4, minmax(120px, 1fr));}
+    }
+    @media (max-width: 600px){
+      .grid{grid-template-columns: repeat(3, minmax(110px, 1fr));}
+    }
+
+    .slot{
+      min-height:64px;
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,0.18);
+      background:rgba(255,255,255,0.03);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      padding:6px;
+      user-select:none;
+    }
+    .slot::before{
+      content: attr(data-index);
+      position:absolute;
+      top:6px; left:8px;
+      font-size:12px;
+      color:rgba(184,192,217,0.7);
+      font-weight:800;
+    }
+
+    .tile{
+      width:100%;
+      border-radius:12px;
+      padding:10px 8px;
+      font-weight:900;
+      text-align:center;
+      font-size:20px;
+      line-height:1.1;
+      background: var(--tile);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      border:1px solid rgba(255,255,255,0.12);
+      cursor:pointer;
+      user-select:none;
+      touch-action:manipulation;
+    }
+    .tile.small{font-size:18px;}
+    .tile.selected{
+      outline:3px solid rgba(122,162,255,0.85);
+      transform: translateY(-1px);
+    }
+    .tile.locked{
+      outline:2px solid rgba(34,197,94,0.8);
+      opacity:0.95;
+    }
+
+    .msg{margin-top:12px; font-weight:800;}
+    .msg.good{color:var(--good);}
+    .msg.bad{color:var(--bad);}
+    .legend{margin-top:10px; color:var(--muted); font-size:13px; line-height:1.5;}
+    .legend b{color:#fff;}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Week 1：救恩大故事（排序游戏）</h1>
+    <div class="sub">
+      玩法：<b>先点一个方块</b>（会发光），再点你想放的位置。大家轮流当“读的人 / 移的人 / 检查的人”。<br/>
+      目标：把 12 个阶段按正确顺序排好。
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <button class="primary" id="shuffleBtn">Shuffle 打乱</button>
+        <button id="resetBtn">Reset 重新开始</button>
+        <button id="undoBtn">Undo 撤销一步</button>
+        <button class="good" id="checkBtn">Check 检查答案</button>
+        <button id="hintBtn">Hint 提示下一个</button>
+        <button id="lockBtn">Lock 正确的先锁住</button>
+        <span class="pill" id="progressPill">0 / 12 correct</span>
+      </div>
+
+      <div class="grid" id="board"></div>
+      <div class="msg" id="message"></div>
+
+      <div class="legend">
+        小建议：<b>先排上面 5 个大阶段</b>（创造→…→应许之地），再加中间 4 个，最后加底下 3 个。<br/>
+        也可以玩计时：每错一次 +10 秒。最后一起复述一遍“上帝的大故事”。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Correct order (from your slide)
+    const CORRECT = [
+      "创造", "堕落", "亚伯拉罕", "出埃及记", "应许之地",
+      "王国", "南北国", "被掳", "归回",
+      "耶稣基督", "教会", "新天新地"
+    ];
+
+    // Optional: color grouping similar to the picture
+    function tileColor(label){
+      const top = new Set(["创造","堕落","亚伯拉罕","出埃及记","应许之地"]);
+      const mid = new Set(["王国","南北国","被掳","归回"]);
+      const bot = new Set(["耶稣基督","教会","新天新地"]);
+      if(top.has(label)) return "var(--tile2)";
+      if(mid.has(label)) return "var(--tile4)";
+      if(bot.has(label)) return "var(--tile)";
+      return "var(--tile)";
+    }
+
+    const boardEl = document.getElementById("board");
+    const msgEl = document.getElementById("message");
+    const pillEl = document.getElementById("progressPill");
+
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const undoBtn = document.getElementById("undoBtn");
+    const checkBtn = document.getElementById("checkBtn");
+    const hintBtn = document.getElementById("hintBtn");
+    const lockBtn = document.getElementById("lockBtn");
+
+    // State
+    let slots = [];          // array of slot objects { label: string|null, locked: boolean }
+    let selectedIndex = null;
+    let history = [];        // for undo (stores previous slots snapshots)
+
+    function cloneSlots(s){
+      return s.map(x => ({ label: x.label, locked: x.locked }));
+    }
+
+    function saveHistory(){
+      history.push(cloneSlots(slots));
+      if(history.length > 50) history.shift();
+    }
+
+    function fisherYates(arr){
+      const a = arr.slice();
+      for(let i=a.length-1; i>0; i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function init(shuffled=true){
+      const labels = shuffled ? fisherYates(CORRECT) : CORRECT.slice();
+      slots = labels.map(l => ({ label: l, locked: false }));
+      selectedIndex = null;
+      history = [];
+      render();
+      setMessage("");
+    }
+
+    function setMessage(text, kind=""){
+      msgEl.className = "msg " + kind;
+      msgEl.textContent = text;
+    }
+
+    function correctCount(){
+      let c = 0;
+      for(let i=0;i<CORRECT.length;i++){
+        if(slots[i].label === CORRECT[i]) c++;
+      }
+      return c;
+    }
+
+    function updatePill(){
+      pillEl.textContent = `${correctCount()} / 12 correct`;
+    }
+
+    function render(){
+      boardEl.innerHTML = "";
+      for(let i=0;i<slots.length;i++){
+        const slot = document.createElement("div");
+        slot.className = "slot";
+        slot.dataset.index = (i+1);
+        slot.addEventListener("click", () => onSlotClick(i));
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        const label = slots[i].label;
+
+        // Slightly smaller text for longer label
+        if(label.length >= 4) tile.classList.add("small");
+
+        tile.textContent = label;
+        tile.style.background = tileColor(label);
+
+        if(selectedIndex === i) tile.classList.add("selected");
+        if(slots[i].locked) tile.classList.add("locked");
+
+        slot.appendChild(tile);
+        boardEl.appendChild(slot);
+      }
+      updatePill();
+    }
+
+    function swap(i, j){
+      if(i === j) return;
+      if(slots[i].locked || slots[j].locked){
+        setMessage("这格已经锁住了，不能换。", "bad");
+        return;
+      }
+      saveHistory();
+      const tmp = slots[i].label;
+      slots[i].label = slots[j].label;
+      slots[j].label = tmp;
+      selectedIndex = null;
+      render();
+      setMessage("");
+    }
+
+    function onSlotClick(i){
+      // if nothing selected, select
+      if(selectedIndex === null){
+        selectedIndex = i;
+        render();
+        return;
+      }
+      // if same slot tapped, unselect
+      if(selectedIndex === i){
+        selectedIndex = null;
+        render();
+        return;
+      }
+      // otherwise swap selected with clicked
+      swap(selectedIndex, i);
+    }
+
+    // Buttons
+    shuffleBtn.addEventListener("click", () => {
+      init(true);
+      setMessage("已打乱。开始吧！");
+    });
+
+    resetBtn.addEventListener("click", () => {
+      init(true);
+      setMessage("重新开始～");
+    });
+
+    undoBtn.addEventListener("click", () => {
+      if(history.length === 0){
+        setMessage("没有可以撤销的步骤。");
+        return;
+      }
+      slots = history.pop();
+      selectedIndex = null;
+      render();
+      setMessage("已撤销一步。");
+    });
+
+    checkBtn.addEventListener("click", () => {
+      const c = correctCount();
+      if(c === CORRECT.length){
+        setMessage("全对！你们完成了上帝救恩的大故事！", "good");
+      }else{
+        setMessage(`目前对了 ${c}/12。继续加油！可以用 Hint 或先 Lock 正确的。`, "bad");
+      }
+    });
+
+    hintBtn.addEventListener("click", () => {
+      // Find first incorrect slot and highlight what should go there
+      for(let i=0;i<CORRECT.length;i++){
+        if(slots[i].label !== CORRECT[i]){
+          setMessage(`提示：第 ${i+1} 格应该是「${CORRECT[i]}」。`, "");
+          return;
+        }
+      }
+      setMessage("已经全对了！", "good");
+    });
+
+    lockBtn.addEventListener("click", () => {
+      saveHistory();
+      for(let i=0;i<CORRECT.length;i++){
+        slots[i].locked = (slots[i].label === CORRECT[i]);
+      }
+      selectedIndex = null;
+      render();
+      setMessage("已锁住目前放对的格子。");
+    });
+
+    // Start
+    init(true);
+  </script>
+</body>
+</html>
