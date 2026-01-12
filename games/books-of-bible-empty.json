@@ -1,0 +1,8 @@
+{
+  "type": "wordsearch",
+  "title": "Books of the Bible Word Search",
+  "description": "Find the Bible books hidden in the grid (tap letters to select).",
+  "age": "7–10",
+  "size": 12,
+  "words": ["GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY", "MATTHEW", "MARK", "LUKE", "JOHN"]
+}

@@ -1,0 +1,8 @@
+{
+  "type": "reorder",
+  "title": "The Story of Salvation - A Meta Narrative",
+  "description": "Work together to arrange some key moments of the Story of Salvation in the correct order.",
+  "age": "7–10",
+  "tiles": ["创造","堕落","亚伯拉罕","出埃及记","应许之地","王国","南北国","被掳","归回","耶稣基督","教会","新天新地"],
+  "correct": ["创造","堕落","亚伯拉罕","出埃及记","应许之地","王国","南北国","被掳","归回","耶稣基督","教会","新天新地"]
+}

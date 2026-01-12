@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Play</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
+      background:linear-gradient(180deg,#070b14,#0b1220);color:#fff;}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px;}
+    .top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+    button{border:0;border-radius:12px;padding:10px 12px;background:rgba(255,255,255,0.10);color:#fff;cursor:pointer;font-weight:800;}
+    button:hover{background:rgba(255,255,255,0.16);}
+    h1{margin:6px 0 6px;font-size:24px;font-weight:900;}
+    .sub{color:#b8c0d9;margin-bottom:14px;}
+    .panel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;}
+    .err{color:#ffb4b4;font-weight:900;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <button onclick="location.href='index.html'">← Back to Library</button>
+      <button id="restartBtn">Restart</button>
+    </div>
+
+    <h1 id="title">Loading…</h1>
+    <div class="sub" id="description"></div>
+
+    <div class="panel" id="mount"></div>
+    <div class="err" id="error"></div>
+  </div>
+
+  <script type="module">
+    const mount = document.getElementById("mount");
+    const errEl = document.getElementById("error");
+    const titleEl = document.getElementById("title");
+    const descEl = document.getElementById("description");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function getGameFile(){
+      const p = new URLSearchParams(location.search);
+      return p.get("game");
+    }
+
+    async function loadGameData(){
+      const gameFile = getGameFile();
+      if(!gameFile) throw new Error("No game selected.");
+
+      const res = await fetch(`games/${gameFile}`);
+      if(!res.ok) throw new Error(`Cannot load games/${gameFile}`);
+      return await res.json();
+    }
+
+    async function boot(){
+      try{
+        const data = await loadGameData();
+        titleEl.textContent = data.title || "Game";
+        descEl.textContent = data.description || "";
+
+        // Choose module by type
+        let mod;
+        if(data.type === "reorder"){
+          mod = await import("./src/reorder.js");
+        }else if(data.type === "wordsearch"){
+          mod = await import("./src/wordsearch.js");
+        }else{
+          throw new Error(`Unknown game type: ${data.type}`);
+        }
+
+        // Mount game
+        mount.innerHTML = "";
+        const api = mod.mount(mount, data);
+        restartBtn.onclick = () => api.restart();
+
+      }catch(e){
+        errEl.textContent = String(e.message || e);
+        console.error(e);
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>
