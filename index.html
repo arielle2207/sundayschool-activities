@@ -5,22 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sunday School Game Library</title>
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Apply settings early (before paint)
+    (function(){
+      const soundOn = (localStorage.getItem("soundOn") ?? "1") !== "0";
+      const tapMode = (localStorage.getItem("tapMode") ?? "0") === "1";
+      document.documentElement.dataset.sound = soundOn ? "1" : "0";
+      document.documentElement.dataset.tap = tapMode ? "1" : "0";
+    })();
+  </script>
 </head>
 <body>
-  <div class="wrap">
+  <!-- cute moving clouds -->
+  <div class="clouds" aria-hidden="true">
+    <div class="cloud" style="top:70px; left:-260px; animation-delay:-6s; opacity:0.9;"></div>
+    <div class="cloud" style="top:160px; left:-260px; width:260px; height:86px; animation-delay:-14s; opacity:0.75;"></div>
+    <div class="cloud" style="top:110px; left:-260px; width:190px; height:72px; animation-delay:-20s; opacity:0.65;"></div>
+  </div>
 
+  <div class="wrap">
     <div class="header">
       <div class="brand">
-        <div class="logo"></div>
+        <div class="mascot" title="Mascot">
+          <img src="assets/sheep.svg" alt="Cartoon sheep mascot" />
+        </div>
         <div>
-          <div style="font-weight:1000;font-size:16px;">Sunday School Games</div>
-          <div style="color:var(--muted);font-weight:800;font-size:13px;">Pick a game to play together</div>
+          <div class="brandTitle">Sunday School Games</div>
+          <div class="brandSub">Pick a game to play together</div>
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div class="toggleRow">
+        <div class="toggle" title="Sound effects">
+          <span>Sound</span>
+          <div class="switch sound" id="soundSwitch" role="switch" aria-checked="true" tabindex="0"></div>
+        </div>
+        <div class="toggle" title="Bigger buttons for iPad">
+          <span>Tap mode</span>
+          <div class="switch tap" id="tapSwitch" role="switch" aria-checked="false" tabindex="0"></div>
+        </div>
         <a class="btn btn-primary" href="index.html" style="text-decoration:none;">Games</a>
-        <a class="btn" href="README.html" style="text-decoration:none;display:none;">About</a>
       </div>
     </div>
 
@@ -34,6 +58,70 @@
   <script>
     const grid = document.getElementById("grid");
     const statusEl = document.getElementById("status");
+
+    const soundSwitch = document.getElementById("soundSwitch");
+    const tapSwitch = document.getElementById("tapSwitch");
+
+    function syncSwitches(){
+      const soundOn = document.documentElement.dataset.sound !== "0";
+      const tapOn = document.documentElement.dataset.tap === "1";
+      soundSwitch.setAttribute("aria-checked", String(soundOn));
+      tapSwitch.setAttribute("aria-checked", String(tapOn));
+    }
+
+    function toggleSound(){
+      const next = document.documentElement.dataset.sound === "1" ? "0" : "1";
+      document.documentElement.dataset.sound = next;
+      localStorage.setItem("soundOn", next);
+      syncSwitches();
+      if(next === "1") playSfx("ding"); // quick feedback
+    }
+
+    function toggleTap(){
+      const next = document.documentElement.dataset.tap === "1" ? "0" : "1";
+      document.documentElement.dataset.tap = next;
+      localStorage.setItem("tapMode", next);
+      syncSwitches();
+    }
+
+    function onSwitchKey(e, fn){
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        fn();
+      }
+    }
+
+    soundSwitch.onclick = toggleSound;
+    tapSwitch.onclick = toggleTap;
+    soundSwitch.onkeydown = (e) => onSwitchKey(e, toggleSound);
+    tapSwitch.onkeydown = (e) => onSwitchKey(e, toggleTap);
+    syncSwitches();
+
+    // Simple built-in sound (no audio files needed)
+    function playSfx(kind){
+      if(document.documentElement.dataset.sound !== "1") return;
+      try{
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+
+        const now = ctx.currentTime;
+        const freq = kind === "pop" ? 520 : 740;
+        o.frequency.setValueAtTime(freq, now);
+
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.35, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(now);
+        o.stop(now + 0.16);
+        o.onended = () => ctx.close();
+      }catch(_){}
+    }
 
     function openGame(gameFile){
       window.location.href = `play.html?game=${encodeURIComponent(gameFile)}`;
@@ -67,7 +155,7 @@
           grid.appendChild(card);
         }
       }catch(e){
-        statusEl.innerHTML = `<div class="err">Could not load games. Make sure you are running Live Server and that games/manifest.json exists.</div>`;
+        statusEl.innerHTML = `<div class="msg bad">Could not load games. Make sure games/manifest.json exists.</div>`;
         console.error(e);
       }
     }

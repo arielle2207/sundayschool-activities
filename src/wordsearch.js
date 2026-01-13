@@ -1,3 +1,6 @@
+// src/wordsearch.js
+// Word search engine with: cute styling classes, sound (pop), confetti + badge on completion, tap-friendly sizing via CSS.
+
 export function mount(root, data){
   const size = data.size ?? 12;
   const words = (data.words ?? []).map(w => w.toUpperCase());
@@ -5,20 +8,21 @@ export function mount(root, data){
 
   let grid = makeEmpty(size);
   let placed = [];
+  let selectedCells = [];
 
   root.innerHTML = `
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
-      <button id="new">New Grid</button>
-      <button id="clear">Clear Selection</button>
-      <span id="pill" style="padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.08);font-weight:800;color:#b8c0d9;"></span>
+    <div class="reorderToolbar" style="margin-bottom:12px;">
+      <button class="btn btn-primary" id="new">New Grid</button>
+      <button class="btn" id="clear">Clear Selection</button>
+      <span class="pill" id="pill"></span>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr;gap:14px;">
+    <div class="wsLayout">
       <div id="gridWrap"></div>
       <div>
-        <div style="font-weight:900;margin-bottom:8px;">Find these words:</div>
-        <div id="wordList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-        <div id="msg" style="margin-top:10px;font-weight:900;color:#b8c0d9;"></div>
+        <div style="font-weight:1000;margin-bottom:10px;">Find these words:</div>
+        <div class="wsWordList" id="wordList"></div>
+        <div class="msg neutral" id="msg" style="margin-top:10px;"></div>
       </div>
     </div>
   `;
@@ -28,8 +32,6 @@ export function mount(root, data){
   const gridWrap = root.querySelector("#gridWrap");
   const wordList = root.querySelector("#wordList");
 
-  let selectedCells = [];
-
   function build(){
     grid = makeEmpty(size);
     placed = [];
@@ -38,9 +40,10 @@ export function mount(root, data){
 
     // place words (horizontal/vertical/diagonal + backwards)
     for(const w of words){
-      const ok = placeWord(grid, w, 200);
+      const ok = placeWord(grid, w, 240);
       if(ok) placed.push(w);
     }
+
     // fill blanks
     for(let r=0;r<size;r++){
       for(let c=0;c<size;c++){
@@ -52,49 +55,36 @@ export function mount(root, data){
   }
 
   function render(){
-    // pill
-    const found = data._found ?? new Set();
+    const found = data._found ?? (data._found = new Set());
     pill.textContent = `${found.size} / ${placed.length} found`;
 
     // word list
     wordList.innerHTML = "";
     for(const w of placed){
       const tag = document.createElement("span");
+      tag.className = "wsTag" + (found.has(w) ? " found" : "");
       tag.textContent = w;
-      tag.style.padding = "6px 10px";
-      tag.style.borderRadius = "999px";
-      tag.style.fontWeight = "900";
-      tag.style.fontSize = "12px";
-      tag.style.border = "1px solid rgba(255,255,255,0.14)";
-      tag.style.background = found.has(w) ? "rgba(34,197,94,0.18)" : "rgba(122,162,255,0.18)";
       wordList.appendChild(tag);
     }
 
-    // grid UI
+    // grid
     gridWrap.innerHTML = "";
     const table = document.createElement("div");
-    table.style.display = "grid";
+    table.className = "wsGrid";
     table.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-    table.style.gap = "6px";
 
     for(let r=0;r<size;r++){
       for(let c=0;c<size;c++){
         const cell = document.createElement("button");
+        cell.className = "wsCell";
         cell.textContent = grid[r][c];
-        cell.style.padding = "10px 0";
-        cell.style.borderRadius = "10px";
-        cell.style.fontWeight = "900";
-        cell.style.background = "rgba(255,255,255,0.08)";
-        cell.style.border = "1px solid rgba(255,255,255,0.12)";
-        cell.style.cursor = "pointer";
 
         const key = `${r},${c}`;
-        if(selectedCells.some(x => x === key)){
-          cell.style.outline = "3px solid rgba(122,162,255,0.85)";
+        if(selectedCells.includes(key)){
+          cell.classList.add("selected");
         }
 
         cell.onclick = () => {
-          // Toggle selection
           if(selectedCells.includes(key)){
             selectedCells = selectedCells.filter(x => x !== key);
           }else{
@@ -118,19 +108,41 @@ export function mount(root, data){
     }).join("");
 
     const rev = letters.split("").reverse().join("");
-
     const found = data._found ?? (data._found = new Set());
 
     if(placed.includes(letters) && !found.has(letters)){
       found.add(letters);
+      msg.className = "msg good";
       msg.textContent = `Found: ${letters}`;
       selectedCells = [];
-    }else if(placed.includes(rev) && !found.has(rev)){
+      playSfx("pop");
+      maybeComplete(found);
+      return;
+    }
+
+    if(placed.includes(rev) && !found.has(rev)){
       found.add(rev);
+      msg.className = "msg good";
       msg.textContent = `Found: ${rev}`;
       selectedCells = [];
-    }else{
-      msg.textContent = letters.length ? `Selected: ${letters}` : "";
+      playSfx("pop");
+      maybeComplete(found);
+      return;
+    }
+
+    msg.className = "msg neutral";
+    msg.textContent = letters.length ? `Selected: ${letters}` : "";
+  }
+
+  function maybeComplete(found){
+    if(found.size === placed.length && placed.length > 0){
+      playSfx("ding");
+      confetti();
+      showBadge({
+        title: "Well done!",
+        sub: "You found all the words.",
+        badge: "Word Search Star"
+      });
     }
   }
 
@@ -141,6 +153,7 @@ export function mount(root, data){
 
   root.querySelector("#clear").onclick = () => {
     selectedCells = [];
+    msg.className = "msg neutral";
     msg.textContent = "";
     render();
   };
@@ -194,8 +207,85 @@ function placeWord(grid, word, attempts){
   return false;
 }
 
+/* ---------- Rewards & SFX helpers ---------- */
 
-function confetti(root){
+function soundEnabled(){
+  return document.documentElement.dataset.sound === "1";
+}
+
+function playSfx(kind){
+  if(!soundEnabled()) return;
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+
+    const now = ctx.currentTime;
+    const freq = kind === "pop" ? 520 : 740;
+    o.frequency.setValueAtTime(freq, now);
+
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.35, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start(now);
+    o.stop(now + 0.16);
+    o.onended = () => ctx.close();
+  }catch(_){}
+}
+
+function showBadge({ title, sub, badge }){
+  const old = document.querySelector(".badgeOverlay");
+  if(old) old.remove();
+
+  const overlay = document.createElement("div");
+  overlay.className = "badgeOverlay";
+
+  overlay.innerHTML = `
+    <div class="badgeCard" role="dialog" aria-modal="true">
+      <div class="badgeIcon">
+        <img src="assets/sheep.svg" alt="Sheep badge" />
+      </div>
+      <div class="badgeTitle">${escapeHtml(title)}</div>
+      <div class="badgeSub">${escapeHtml(sub)}<br/><b>Badge:</b> ${escapeHtml(badge)}</div>
+      <div class="badgeButtons">
+        <button class="btn btn-primary" id="badgeAgain">Play again</button>
+        <button class="btn" id="badgeBack">Back to library</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", (e) => {
+    if(e.target === overlay) overlay.remove();
+  });
+
+  overlay.querySelector("#badgeAgain").onclick = () => {
+    overlay.remove();
+    const restartBtn = document.getElementById("restartBtn");
+    if(restartBtn) restartBtn.click();
+  };
+
+  overlay.querySelector("#badgeBack").onclick = () => {
+    window.location.href = "index.html";
+  };
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function confetti(){
   const layer = document.createElement("div");
   layer.style.position = "fixed";
   layer.style.inset = "0";
