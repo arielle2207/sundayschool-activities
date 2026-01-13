@@ -1,0 +1,153 @@
+/* styles.css */
+
+/* Kid-friendly theme variables */
+:root{
+  --sky1:#7dd3fc;
+  --sky2:#c4b5fd;
+  --sky3:#fbcfe8;
+
+  --ink:#10203a;
+  --muted:#3a4a6a;
+
+  --card:rgba(255,255,255,0.85);
+  --cardBorder:rgba(16,32,58,0.12);
+
+  --btn:#ffffff;
+  --btnBorder:rgba(16,32,58,0.18);
+
+  --primary:#60a5fa;
+  --primary2:#a78bfa;
+  --good:#22c55e;
+  --bad:#ef4444;
+
+  --tileTop:#fb923c;
+  --tileMid:#34d399;
+  --tileBot:#2dd4bf;
+
+  --shadow: 0 14px 28px rgba(16,32,58,0.18);
+  --shadow2: 0 8px 16px rgba(16,32,58,0.14);
+}
+
+/* Background: sky gradient + subtle bubbles */
+body{
+  margin:0;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255,255,255,0.55), rgba(255,255,255,0) 35%),
+    radial-gradient(circle at 80% 30%, rgba(255,255,255,0.45), rgba(255,255,255,0) 38%),
+    radial-gradient(circle at 40% 85%, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%),
+    linear-gradient(180deg, var(--sky1), var(--sky2) 55%, var(--sky3));
+}
+
+/* Layout */
+.wrap{max-width:1100px;margin:0 auto;padding:24px;position:relative;}
+h1{margin:0 0 8px;font-size:30px;font-weight:1000;letter-spacing:-0.5px;}
+.sub{color:var(--muted);margin-bottom:18px;line-height:1.5;font-weight:700;}
+
+/* Header “playground bar” */
+.header{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  padding:14px 16px;border-radius:18px;
+  background:rgba(255,255,255,0.65);
+  border:1px solid rgba(16,32,58,0.10);
+  box-shadow: var(--shadow2);
+  margin-bottom:16px;
+}
+.brand{
+  display:flex;align-items:center;gap:12px;
+}
+.logo{
+  width:42px;height:42px;border-radius:14px;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  box-shadow: var(--shadow2);
+  position:relative;
+}
+.logo::after{
+  content:"";
+  position:absolute;inset:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.75);
+}
+
+/* Buttons: chunky + friendly */
+button, .btn{
+  border:1px solid var(--btnBorder);
+  border-radius:16px;
+  padding:10px 14px;
+  background:var(--btn);
+  color:var(--ink);
+  cursor:pointer;
+  font-weight:900;
+  box-shadow: var(--shadow2);
+  transform: translateY(0);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+button:hover, .btn:hover{transform: translateY(-1px);box-shadow: var(--shadow);}
+button:active, .btn:active{transform: translateY(0);box-shadow: var(--shadow2);}
+
+.btn-primary{
+  background: linear-gradient(135deg, rgba(96,165,250,0.95), rgba(167,139,250,0.95));
+  border-color: rgba(16,32,58,0.10);
+}
+.btn-primary{color:#0b1530;}
+.btn-good{
+  background: linear-gradient(135deg, rgba(34,197,94,0.95), rgba(45,212,191,0.95));
+  border-color: rgba(16,32,58,0.10);
+}
+.btn-bad{
+  background: linear-gradient(135deg, rgba(239,68,68,0.95), rgba(251,146,60,0.95));
+  border-color: rgba(16,32,58,0.10);
+}
+
+/* Cards / panels */
+.panel{
+  background:var(--card);
+  border:1px solid var(--cardBorder);
+  border-radius:22px;
+  padding:18px;
+  box-shadow: var(--shadow);
+}
+
+/* Game library grid cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
+.card{
+  background:rgba(255,255,255,0.92);
+  border:1px solid rgba(16,32,58,0.12);
+  border-radius:22px;
+  padding:16px;
+  cursor:pointer;
+  box-shadow: var(--shadow2);
+  transition: transform .12s ease, box-shadow .12s ease;
+  position:relative;
+  overflow:hidden;
+}
+.card:hover{transform:translateY(-2px);box-shadow: var(--shadow);}
+.card::before{
+  content:"";
+  position:absolute;left:-30px;top:-30px;width:120px;height:120px;border-radius:38px;
+  background:linear-gradient(135deg, rgba(96,165,250,0.35), rgba(167,139,250,0.35));
+  transform: rotate(18deg);
+}
+.card .title{font-size:20px;font-weight:1000;margin-bottom:8px;position:relative;}
+.card .desc{color:var(--muted);font-size:14px;line-height:1.4;font-weight:700;position:relative;}
+.meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;position:relative;}
+.tag{
+  display:inline-block;padding:6px 10px;border-radius:999px;
+  background:rgba(96,165,250,0.25);
+  border:1px solid rgba(16,32,58,0.10);
+  font-size:12px;font-weight:1000;
+}
+.tag2{background:rgba(34,197,94,0.18);}
+
+/* Pills / messages */
+.pill{
+  padding:8px 12px;border-radius:999px;
+  background:rgba(255,255,255,0.75);
+  border:1px solid rgba(16,32,58,0.10);
+  font-weight:1000;color:var(--muted);
+}
+.msg{margin-top:12px;font-weight:1000;}
+.msg.good{color:var(--good);}
+.msg.bad{color:var(--bad);}
+.msg.neutral{color:var(--muted);}

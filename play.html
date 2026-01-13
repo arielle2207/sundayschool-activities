@@ -4,31 +4,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Play</title>
-  <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
-      background:linear-gradient(180deg,#070b14,#0b1220);color:#fff;}
-    .wrap{max-width:1100px;margin:0 auto;padding:20px;}
-    .top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
-    button{border:0;border-radius:12px;padding:10px 12px;background:rgba(255,255,255,0.10);color:#fff;cursor:pointer;font-weight:800;}
-    button:hover{background:rgba(255,255,255,0.16);}
-    h1{margin:6px 0 6px;font-size:24px;font-weight:900;}
-    .sub{color:#b8c0d9;margin-bottom:14px;}
-    .panel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;}
-    .err{color:#ffb4b4;font-weight:900;}
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <button onclick="location.href='index.html'">← Back to Library</button>
-      <button id="restartBtn">Restart</button>
+  <div class="header">
+  <div class="brand">
+    <div class="logo"></div>
+    <div>
+      <div style="font-weight:1000;font-size:16px;" id="headerTitle">Let’s Play</div>
+      <div style="color:var(--muted);font-weight:800;font-size:13px;">Work together and take turns</div>
     </div>
+  </div>
 
-    <h1 id="title">Loading…</h1>
-    <div class="sub" id="description"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button class="btn" onclick="location.href='index.html'">Back to Library</button>
+    <button class="btn btn-primary" id="restartBtn">Restart</button>
+  </div>
+</div>
 
-    <div class="panel" id="mount"></div>
-    <div class="err" id="error"></div>
+<h1 id="title">Loading…</h1>
+<div class="sub" id="description"></div>
+
+<div class="panel" id="mount"></div>
+<div class="msg bad" id="error"></div>
+
   </div>
 
   <script type="module">

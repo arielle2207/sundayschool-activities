@@ -300,3 +300,38 @@ export function mount(root, data) {
   initFreshShuffle();
   return { restart };
 }
+
+
+function confetti(root){
+  const layer = document.createElement("div");
+  layer.style.position = "fixed";
+  layer.style.inset = "0";
+  layer.style.pointerEvents = "none";
+  layer.style.zIndex = "9999";
+  document.body.appendChild(layer);
+
+  const n = 120;
+  for(let i=0;i<n;i++){
+    const p = document.createElement("div");
+    p.style.position = "absolute";
+    p.style.left = Math.random()*100 + "vw";
+    p.style.top = (-10 - Math.random()*30) + "vh";
+    p.style.width = (6 + Math.random()*8) + "px";
+    p.style.height = (10 + Math.random()*14) + "px";
+    p.style.borderRadius = "6px";
+    p.style.background = `hsl(${Math.floor(Math.random()*360)} 90% 60%)`;
+    p.style.opacity = "0.95";
+    p.style.transform = `rotate(${Math.random()*180}deg)`;
+    p.style.transition = "transform 1.2s linear, top 1.2s linear, left 1.2s linear, opacity 1.2s linear";
+    layer.appendChild(p);
+
+    requestAnimationFrame(() => {
+      p.style.top = (110 + Math.random()*20) + "vh";
+      p.style.left = (parseFloat(p.style.left) + (Math.random()*20-10)) + "vw";
+      p.style.transform = `rotate(${600 + Math.random()*600}deg)`;
+      p.style.opacity = "0.0";
+    });
+  }
+
+  setTimeout(() => layer.remove(), 1400);
+}

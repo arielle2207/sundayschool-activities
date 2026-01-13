@@ -4,30 +4,29 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sunday School Game Library</title>
-  <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
-      background:linear-gradient(180deg,#070b14,#0b1220);color:#fff;}
-    .wrap{max-width:1100px;margin:0 auto;padding:24px;}
-    h1{margin:0 0 6px;font-size:28px;font-weight:900;}
-    .sub{color:#b8c0d9;margin-bottom:20px;}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;}
-    .card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:18px;
-      cursor:pointer;transition:transform .15s ease, background .15s ease;}
-    .card:hover{transform:translateY(-3px);background:rgba(255,255,255,0.10);}
-    .title{font-size:20px;font-weight:900;margin-bottom:8px;}
-    .desc{color:#b8c0d9;font-size:14px;line-height:1.4;}
-    .meta{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
-    .tag{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(122,162,255,0.22);font-size:12px;font-weight:800;}
-    .tag2{background:rgba(34,197,94,0.18);}
-    .err{color:#ffb4b4;font-weight:800;}
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="wrap">
-    <h1>Sunday School Game Library</h1>
-    <div class="sub">Pick a game.</div>
-    <!-- You can add new games by dropping a JSON file into /games and listing it in manifest.json. -->
-     
+
+    <div class="header">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <div style="font-weight:1000;font-size:16px;">Sunday School Games</div>
+          <div style="color:var(--muted);font-weight:800;font-size:13px;">Pick a game to play together</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn btn-primary" href="index.html" style="text-decoration:none;">Games</a>
+        <a class="btn" href="README.html" style="text-decoration:none;display:none;">About</a>
+      </div>
+    </div>
+
+    <h1>Game Library</h1>
+    <div class="sub">Choose an activity. Add new games by adding a JSON file to <b>/games</b> and listing it in <b>manifest.json</b>.</div>
+
     <div id="status"></div>
     <div class="grid" id="grid"></div>
   </div>
