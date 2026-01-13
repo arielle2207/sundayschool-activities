@@ -1,8 +1,34 @@
 {
   "type": "reorder",
-  "title": "The Story of Salvation - A Meta Narrative",
-  "description": "Work together to arrange some key moments of the Story of Salvation in the correct order.",
+  "title": "The Story of Salvation - A Meta Narrative 救恩大故事",
+  "description": "Drag the cards from the tray into the numbered boxes in the correct order.",
   "age": "7–10",
-  "tiles": ["创造","堕落","亚伯拉罕","出埃及记","应许之地","王国","南北国","被掳","归回","耶稣基督","教会","新天新地"],
-  "correct": ["创造","堕落","亚伯拉罕","出埃及记","应许之地","王国","南北国","被掳","归回","耶稣基督","教会","新天新地"]
+  "tiles": [
+    {"id":"creation","en":"Creation","zh":"创造"},
+    {"id":"fall","en":"Fall","zh":"堕落"},
+    {"id":"abraham","en":"Abraham","zh":"亚伯拉罕"},
+    {"id":"exodus","en":"Exodus","zh":"出埃及记"},
+    {"id":"promised_land","en":"Promised Land","zh":"应许之地"},
+    {"id":"kingdom","en":"Kingdom","zh":"王国"},
+    {"id":"divided_kingdom","en":"Divided Kingdom","zh":"南北国"},
+    {"id":"exile","en":"Exile","zh":"被掳"},
+    {"id":"return","en":"Return","zh":"归回"},
+    {"id":"jesus_christ","en":"Jesus Christ","zh":"耶稣基督"},
+    {"id":"church","en":"Church","zh":"教会"},
+    {"id":"new_heaven_new_earth","en":"New Heaven & New Earth","zh":"新天新地"}
+  ],
+  "correct": [
+    "creation",
+    "fall",
+    "abraham",
+    "exodus",
+    "promised_land",
+    "kingdom",
+    "divided_kingdom",
+    "exile",
+    "return",
+    "jesus_christ",
+    "church",
+    "new_heaven_new_earth"
+  ]
 }

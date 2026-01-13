@@ -307,10 +307,41 @@ html[data-tap="1"] .switch.tap::after{ left:21px; }
   border:2px solid rgba(255,255,255,0.70);
   box-shadow: var(--shadow2);
   cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  justify-content:center;
 }
 .reorderTile.small{font-size: calc(var(--tileFont) - 2px);}
 .reorderTile.selected{outline:4px solid rgba(96,165,250,0.75);transform:translateY(-1px);}
 .reorderTile.locked{outline:3px solid rgba(34,197,94,0.70);}
+
+.tileEn{font-size: var(--tileFont);}
+.tileZh{font-size: calc(var(--tileFont) - 4px); opacity:0.9;}
+
+.reorderTrayWrap{margin-top:14px;}
+.reorderTrayTitle{font-weight:1000;color:var(--muted);margin:2px 0 10px 2px;}
+.reorderTray{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap: var(--gridGap);
+}
+
+.reorderSlot.hintPulse{outline:4px solid rgba(96,165,250,0.45);}
+
+.reorderTile.dragging{opacity:0.35;}
+.dragGhost{
+  position:fixed;
+  z-index:99999;
+  width:220px;
+  max-width:70vw;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+}
+.dragGhost .reorderTile{cursor:grabbing;}
+
+@keyframes snapIn{0%{transform:scale(0.92);}60%{transform:scale(1.03);}100%{transform:scale(1.0);}}
+.reorderTile.snap{animation:snapIn 220ms ease-out;}
 
 /* --- Wordsearch styles (shared) --- */
 .wsLayout{display:grid;grid-template-columns:1fr;gap:14px;}
